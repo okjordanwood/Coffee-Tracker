@@ -1,3 +1,3 @@
-export function Authentication() {
-  return <div></div>;
+export default function Authentication() {
+  return <></>;
 }
