@@ -4,7 +4,7 @@ export default function Layout(props) {
   const header = (
     <header>
       <div>
-        <h1 className="text-gradient">CAFFIEND</h1>
+        <h1 className="text-gradient">BuzzLog</h1>
         <p>For Coffee Insatiates</p>
       </div>
       <button>
@@ -17,7 +17,7 @@ export default function Layout(props) {
   const footer = (
     <footer>
       <p>
-        <span className="text-gradient">Caffiend</span> was made by{" "}
+        <span className="text-gradient">BuzzLog</span> was made by{" "}
         <a href="https://jordanwood.netlify.app/" target="_blank">
           Jordan Wood
         </a>{" "}

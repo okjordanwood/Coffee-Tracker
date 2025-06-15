@@ -6,7 +6,7 @@ export default function Hero() {
         <abbr title="An enthusiast or devotee">Fiends</abbr>!
         <div className="benefits-list">
           <h3 className="font-bolder">
-            Try <span className="text-gradient">Caffiend</span> and start...
+            Try <span className="text-gradient">BuzzLog</span> and start...
           </h3>
           <p>✅ Tracking every coffee</p>
           <p>✅ Measuring your blood caffeine levels</p>
