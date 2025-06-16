@@ -2,9 +2,13 @@ import { coffeeOptions } from "../utils";
 import { useState } from "react";
 import Authentication from "./Authentication";
 import Modal from "./Modal";
+import { useAuth } from "../context/AuthContext";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 
 export default function CoffeeForm(props) {
   const { isAuthenticated } = props;
+  const { globalData, setGlobalData, globalUser } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
   const [selectedCoffee, setSelectedCoffee] = useState(null);
@@ -13,23 +17,54 @@ export default function CoffeeForm(props) {
   const [hour, setHour] = useState(0);
   const [min, setMin] = useState(0);
 
-  function handleSubmitForm() {
+  async function handleSubmitForm() {
     if (!isAuthenticated) {
       setShowModal(true);
       return;
     }
 
-    console.log(
-      selectedCoffee +
-        " - Cost: " +
-        coffeeCost +
-        ", Last drank: " +
-        (hour == 0 ? "0 hours" : hour == 1 ? "1 hour" : hour + " hours") +
-        "," +
-        " " +
-        min +
-        " mins ago"
-    );
+    // define a guard clause that only submits the form if it is completed
+    if (!selectedCoffee) {
+      return;
+    }
+
+    try {
+      // then we're going to create a new data obj
+      const newGlobalData = {
+        ...(globalData || {}),
+      };
+
+      const currTime = Date.now();
+      const timeToSubtract = hour * 60 * 60 * 1000 + min * 60 * 1000;
+      const timestamp = currTime - timeToSubtract;
+
+      const newData = {
+        name: selectedCoffee,
+        cost: coffeeCost,
+      };
+      newGlobalData[timestamp] = newData;
+      console.log(timestamp, selectedCoffee, coffeeCost);
+
+      // update the global state
+      setGlobalData(newGlobalData);
+
+      // persist the data in the firebase firestore
+      const userRef = doc(db, "users", globalUser.uid);
+      const res = await setDoc(
+        userRef,
+        {
+          [timestamp]: newData,
+        },
+        { merge: true }
+      );
+
+      setSelectedCoffee(null);
+      setHour(0);
+      setMin(0);
+      setCoffeeCost(0);
+    } catch (err) {
+      console.log(err.message);
+    }
   }
 
   function handleCloseModal() {

@@ -1,14 +1,12 @@
 import {
   calculateCurrentCaffeineLevel,
-  coffeeConsumptionHistory,
   getCaffeineAmount,
   timeSinceConsumption,
 } from "../utils";
-
-// import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function History() {
-  // const { globalData } = useAuth();
+  const { globalData } = useAuth();
 
   return (
     <>
@@ -20,10 +18,10 @@ export default function History() {
         <i>Hover for more information!</i>
       </p>
       <div className="coffee-history">
-        {Object.keys(coffeeConsumptionHistory)
+        {Object.keys(globalData)
           .sort((a, b) => b - a)
           .map((utcTime, coffeeIndex) => {
-            const coffee = coffeeConsumptionHistory[utcTime];
+            const coffee = globalData[utcTime];
             const timeSinceConsumed = timeSinceConsumption(utcTime);
             const originalAmount = getCaffeineAmount(coffee.name);
             const remainingAmount = calculateCurrentCaffeineLevel({
