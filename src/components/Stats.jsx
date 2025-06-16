@@ -20,7 +20,9 @@ function StatCard(props) {
 export default function Stats() {
   const { globalData } = useAuth();
 
-  const stats = calculateCoffeeStats(globalData);
+  const dailyStats = calculateCoffeeStats(globalData, "daily");
+  const weeklyStats = calculateCoffeeStats(globalData, "weekly");
+  const allTimeStats = calculateCoffeeStats(globalData, "all");
   const caffeineLevel = calculateCurrentCaffeineLevel(globalData);
 
   const warningLevel =
@@ -55,22 +57,38 @@ export default function Stats() {
         </StatCard>
         <StatCard title="Daily Caffeine">
           <p>
-            <span className="stat-text">{stats.daily_caffeine}</span>mg
+            <span className="stat-text">{dailyStats.daily_caffeine}</span>mg
           </p>
+          <p>Today: {dailyStats.total_caffeine}mg</p>
+        </StatCard>
+        <StatCard title="Weekly Caffeine">
+          <p>
+            <span className="stat-text">{weeklyStats.daily_caffeine}</span>
+            mg/day
+          </p>
+          <p>Total: {weeklyStats.total_caffeine}mg</p>
         </StatCard>
         <StatCard title="Avg # of Coffees">
           <p>
-            <span className="stat-text">{stats.average_coffees}</span>
+            <span className="stat-text">{dailyStats.average_coffees}</span>/day
           </p>
+          <p>Today: {dailyStats.total_coffees}</p>
         </StatCard>
         <StatCard title="Daily Cost ($)">
           <p>
-            <span className="stat-text">${stats.daily_cost}</span>
+            <span className="stat-text">${dailyStats.daily_cost}</span>
           </p>
+          <p>Today: ${dailyStats.total_cost}</p>
         </StatCard>
-        <StatCard title="Total Cost ($)">
+        <StatCard title="Weekly Cost ($)">
           <p>
-            <span className="stat-text">${stats.total_cost}</span>
+            <span className="stat-text">${weeklyStats.daily_cost}</span>/day
+          </p>
+          <p>Total: ${weeklyStats.total_cost}</p>
+        </StatCard>
+        <StatCard title="All Time Cost ($)">
+          <p>
+            <span className="stat-text">${allTimeStats.total_cost}</span>
           </p>
         </StatCard>
         <table className="stat-table">
@@ -79,6 +97,7 @@ export default function Stats() {
               <th>Coffee Name</th>
               <th>Number of Purchases</th>
               <th>Percentage of Total</th>
+              <th>Last 5 Purchases</th>
             </tr>
           </thead>
           <tbody>
@@ -88,6 +107,15 @@ export default function Stats() {
                   <td>{coffee.coffeeName}</td>
                   <td>{coffee.count}</td>
                   <td>{coffee.percentage}</td>
+                  <td>
+                    <div className="coffee-dates">
+                      {coffee.dates.map((date, dateIndex) => (
+                        <div key={dateIndex} className="coffee-date">
+                          {date}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
                 </tr>
               );
             })}

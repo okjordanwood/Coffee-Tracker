@@ -101,6 +101,94 @@ h2 {
   padding: 1rem;
 }
 
+.coffee-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* History styles */
+.coffee-history {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-date-group {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.history-date-group h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.history-coffees {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.coffee-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.coffee-entry:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.coffee-entry i {
+  font-size: 1.25rem;
+}
+
+.coffee-time {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.history-show-more {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.history-show-recent {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.history-show-more:hover,
+.history-show-recent:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.history-toggle-buttons {
+  margin-top: 1rem;
+  text-align: center;
+}
+
 .modal-underlay {
   position: absolute;
   inset: 0;

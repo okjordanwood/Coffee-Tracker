@@ -139,34 +139,45 @@ export function getCaffeineAmount(coffeeName) {
 }
 
 export function getTopThreeCoffees(historyData) {
-  const coffeeCount = {};
+  // Group entries by coffee name and track dates
+  const coffeeData = {};
 
-  // Count occurrences of each coffee type
-  for (const entry of Object.values(historyData)) {
+  for (const [timestamp, entry] of Object.entries(historyData)) {
     const coffeeName = entry.name;
-    if (coffeeCount[coffeeName]) {
-      coffeeCount[coffeeName]++;
-    } else {
-      coffeeCount[coffeeName] = 1;
+    const date = new Date(parseInt(timestamp)).toLocaleDateString();
+    const time = new Date(parseInt(timestamp)).toLocaleTimeString();
+    const fullDate = `${date} ${time}`;
+
+    if (!coffeeData[coffeeName]) {
+      coffeeData[coffeeName] = {
+        count: 0,
+        dates: [],
+      };
     }
+
+    coffeeData[coffeeName].count++;
+    coffeeData[coffeeName].dates.push(fullDate);
   }
 
-  // Convert coffeeCount object to an array of [coffeeName, count] and sort by count
-  const sortedCoffees = Object.entries(coffeeCount).sort((a, b) => b[1] - a[1]);
+  // Convert to array and sort by count
+  const sortedCoffees = Object.entries(coffeeData).sort(
+    (a, b) => b[1].count - a[1].count
+  );
 
   // Calculate total coffees consumed
-  const totalCoffees = Object.values(coffeeCount).reduce(
-    (sum, count) => sum + count,
+  const totalCoffees = sortedCoffees.reduce(
+    (sum, [, data]) => sum + data.count,
     0
   );
 
-  // Get the top 3 most popular coffees
-  const topThree = sortedCoffees.slice(0, 3).map(([coffeeName, count]) => {
-    const percentage = ((count / totalCoffees) * 100).toFixed(2);
+  // Get the top 3 most popular coffees with their dates
+  const topThree = sortedCoffees.slice(0, 3).map(([coffeeName, data]) => {
+    const percentage = ((data.count / totalCoffees) * 100).toFixed(2);
     return {
       coffeeName: coffeeName,
-      count: count,
+      count: data.count,
       percentage: percentage + "%",
+      dates: data.dates.sort().slice(-5), // Show last 5 dates
     };
   });
 
@@ -201,16 +212,40 @@ export function timeSinceConsumption(utcMilliseconds) {
   return result.trim(); // Remove any trailing space
 }
 
-// This function was added during recording
-export function calculateCoffeeStats(coffeeConsumptionHistory) {
+export function filterHistoryByTimePeriod(history, period = "all") {
+  const now = new Date();
+  const filteredHistory = {};
+
+  for (const [timestamp, coffee] of Object.entries(history)) {
+    const date = new Date(parseInt(timestamp));
+    const timeDiff = now - date;
+
+    if (period === "daily" && timeDiff <= 24 * 60 * 60 * 1000) {
+      filteredHistory[timestamp] = coffee;
+    } else if (period === "weekly" && timeDiff <= 7 * 24 * 60 * 60 * 1000) {
+      filteredHistory[timestamp] = coffee;
+    } else if (period === "all") {
+      filteredHistory[timestamp] = coffee;
+    }
+  }
+
+  return filteredHistory;
+}
+
+export function calculateCoffeeStats(coffeeConsumptionHistory, period = "all") {
+  const filteredHistory = filterHistoryByTimePeriod(
+    coffeeConsumptionHistory,
+    period
+  );
+
   const dailyStats = {};
   let totalCoffees = 0;
   let totalCost = 0;
   let totalCaffeine = 0;
   let totalDaysWithCoffee = 0;
 
-  for (const [timestamp, coffee] of Object.entries(coffeeConsumptionHistory)) {
-    const date = new Date(parseInt(timestamp)).toISOString().split("T")[0]; // Extract date in YYYY-MM-DD format
+  for (const [timestamp, coffee] of Object.entries(filteredHistory)) {
+    const date = new Date(parseInt(timestamp)).toISOString().split("T")[0];
     const caffeine = getCaffeineAmount(coffee.name);
     const cost = parseFloat(coffee.cost);
 
@@ -226,29 +261,19 @@ export function calculateCoffeeStats(coffeeConsumptionHistory) {
     // Update totals
     totalCoffees += 1;
     totalCost += cost;
+    totalCaffeine += caffeine;
   }
 
   const days = Object.keys(dailyStats).length;
-  const dailyCaffeine = {};
-  for (const [date, stats] of Object.entries(dailyStats)) {
-    if (stats.caffeine > 0) {
-      totalCaffeine += stats.caffeine;
-      totalDaysWithCoffee += 1; // Count days when caffeine was consumed
-    }
-  }
+  const avgDailyCaffeine = days > 0 ? (totalCaffeine / days).toFixed(2) : 0;
+  const avgDailyCost = days > 0 ? (totalCost / days).toFixed(2) : 0;
 
-  // Calculate average daily caffeine and average daily cost
-  const averageDailyCaffeine =
-    totalDaysWithCoffee > 0
-      ? (totalCaffeine / totalDaysWithCoffee).toFixed(2)
-      : 0;
-  const averageDailyCost =
-    totalDaysWithCoffee > 0 ? (totalCost / totalDaysWithCoffee).toFixed(2) : 0;
-  console.log(totalCost, typeof totalCost);
   return {
-    daily_caffeine: averageDailyCaffeine,
-    daily_cost: averageDailyCost,
+    daily_caffeine: avgDailyCaffeine,
+    daily_cost: avgDailyCost,
     average_coffees: (totalCoffees / days).toFixed(2),
     total_cost: totalCost.toFixed(2),
+    total_caffeine: totalCaffeine.toFixed(2),
+    total_coffees: totalCoffees,
   };
 }
